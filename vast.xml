@@ -1,0 +1,20 @@
+<VAST version="3.0">
+  <Ad>
+    <InLine>
+      <AdSystem>My Ad System</AdSystem>
+      <AdTitle>My Ad Title</AdTitle>
+     
+      <Creatives>
+        <Creative>
+          <Linear>
+            <Duration>00:00:05</Duration>
+            <MediaFiles>
+              <MediaFile delivery="progressive" type="video/mp4" width="200" height="300"><![CDATA[http://localhost:8000/ad.mp4]]></MediaFile>
+            </MediaFiles>
+            
+          </Linear>
+        </Creative>
+      </Creatives>
+    </InLine>
+  </Ad>
+</VAST>

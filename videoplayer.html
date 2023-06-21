@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Video.js Player</title>
+<link href="https://vjs.zencdn.net/8.3.0/video-js.min.css" rel="stylesheet">
+<script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+<style>
+#my-video {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10; /* Add z-index to keep player above ad video */
+}
+
+/* Add this to your styles */
+.skip-button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 5px;
+  display: none; /* Hide it initially */
+  z-index: 20; /* Add z-index to keep skip button above ad video */
+}
+</style>
+<!-- Plugins -->
+<script src="https://cdn.jsdelivr.net/npm/videojs-contrib-quality-levels@3.0.0/dist/videojs-contrib-quality-levels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/videojs-hls-quality-selector@1.1.4/dist/videojs-hls-quality-selector.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/videojs-contrib-ads@6.6.5/dist/videojs-contrib-ads.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/videojs-ima@1.9.0/dist/videojs.ima.min.js"></script>
+<script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+</head>
+<body>
+<video id="my-video" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360" autoplay>
+<source src="openh.mp4">
+</video>
+<script>
+const skipButton = document.createElement('button');
+skipButton.classList.add('skip-button');
+skipButton.innerText = 'Skip Ad';
+document.getElementById('my-video').appendChild(skipButton);
+
+document.addEventListener('DOMContentLoaded', function () {
+  const player = videojs('my-video');
+
+  // Quality Levels
+  player.qualityLevels();
+  player.hlsQualitySelector();
+
+  // Playback Speed
+  player.ready(function () {
+    this.playbackRate(1);
+    this.controlBar.addChild('playbackRateMenuButton', { playbackRates: [1, 1.25, 1.5, 1.75, 2] });
+  });
+
+  // VAST
+  player.ima({
+    adTagUrl: 'http://localhost:8000/vast.xml',
+    adsCancelTimeout: 3000,
+    adsEnabled : true,
+    showControlsForAds: true,
+    vpaidFlashLoaderPath : "github.com/MailOnline/videojs-vast-vpaid/blob/RELEASE/bin/VPAIDFlash.swf?raw=true" ,
+    contribAdsSettings: {
+      prerollTimeout: 5000,
+      postrollTimeout: 5000
+    }
+  });
+
+  player.ready(function() {
+    // Initialize Ad Display Container
+    player.ima.initializeAdDisplayContainer();
+    // Request Ads
+    player.ima.requestAds();
+  });
+
+  // Video End Event
+  player.on('ads-ad-ended', function () {
+    // skipButton.style.display = 'none';
+  });
+
+  player.on('ads-ad-started', function () {
+    // skipButton.style.display = 'none';
+  });
+
+  // Skip Ad
+  player.on('ima-ad-progress', function (e) {
+    const remainingTime = e.data.duration - e.data.currentTime;
+    if (remainingTime <= 5) {
+      skipButton.style.display = 'block'; // Show skip button
+      // Add an onclick listener to the skip button
+      skipButton.onclick = function () {
+        player.ima.skipAd();
+      };
+      // Send log to server
+    }
+  });
+});
+</script>
+</body>
+</html>
